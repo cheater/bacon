@@ -14,6 +14,12 @@ if ! [ "$?" -eq 0 ]; then
   error=1
   fi
 
+type readlink >/dev/null 2>&1
+if ! [ "$?" -eq 0 ]; then
+  echo "\`readlink' not found." >&2
+  error=1
+  fi
+
 type basename >/dev/null 2>&1
 if ! [ "$?" -eq 0 ]; then
   echo "\`basename' not found." >&2
@@ -114,7 +120,7 @@ show_bacons() {
     if [ "x" == "x$bacons" ]; then
       echo "no bacons."
     else
-      for bacon in "${bacons[@]}"; do
+      while read bacon; do
         echo -n "$bacon"
         bp=$(baconpath "$bacon")
         if [ -L "$bp" ]; then
@@ -132,7 +138,7 @@ show_bacons() {
         else
           echo " (unknown bacon)"
           fi
-        done
+	done < <(ls -1A "$bd")
       fi
     fi
   }

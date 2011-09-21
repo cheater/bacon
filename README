@@ -17,7 +17,8 @@ bacons
 
 INSTALLATION
 
-This program requires the programs relpath, realpath, basename, and bash.
+This program requires the presence of the programs relpath, realpath, readlink,
+basename, as well as bash.
 
 In order to install this program you first need to install relpath, which can
 be found at <http://bitbucket.org/cheater/relpath>. Finally, run the installer
