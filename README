@@ -21,7 +21,7 @@ This program requires the presence of the programs relpath, realpath, readlink,
 basename, as well as bash.
 
 In order to install this program you first need to install relpath, which can
-be found at <http://bitbucket.org/cheater/relpath>. Finally, run the installer
+be found at <http://bitbucket.org/cheater/relpath>. Next, execute the installer
 install-bacon.sh, which will install the executables and the library by making
 symlinks to files under this directory, as well as append your .bashrc script.
 
