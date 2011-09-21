@@ -1,0 +1,106 @@
+NAME
+
+bacon, bacons, libbacon_ps1
+
+
+ABOUT THIS PROGRAM
+
+This program enables you to create prefixes for directories and refer to them.
+
+
+SYNOPSIS
+
+bacon [OPTION]... [-d BACON]... [-e BACON]... [-n BACON]...
+
+bacons
+
+
+INSTALLATION
+
+This program requires the programs relpath, realpath, basename, and bash.
+
+In order to install this program you first need to install relpath, which can
+be found at <http://bitbucket.org/cheater/relpath>. Finally, run the installer
+install-bacon.sh, which will install the executables and the library by making
+symlinks to files under this directory, as well as append your .bashrc script.
+
+Alternatively, just copy the files into the right places and augument your
+user profile's .bashrc file.
+
+
+USAGE
+
+The bacon library and supporting binaries are made to help you find yourself in
+your file system. The idea is simple: create prefixes just like the ~ used for
+the home directory; use them to cd to directories easily; show the path in the
+bash prompt relative to those stored paths.
+
+Each such stored path is called a bacon, and is represented in the file system
+by a symbolik link in ~/.bacons pointing towards your path of choice. You may
+create new bacons using bacon -n BACON, as well as remove existing bacons using
+bacon -e BACON. You can also list currently existing bacons using bacon -l,
+bacon -ll, or bacons. The last two commands are exactly equivalent.
+
+  -n BACON    create new bacon named BACON, pointing to working directory
+  -e BACON    eat BACON - remove it, but only if it's a symlink or empty dir
+  -d BACON    delete BACON and any contents if it was a directory
+  -l[l]       list bacons; use twice for verbose listing
+  -f          fry bacon
+  -h          print this help
+
+In addition to this, by putting ~/.bacons in your $CDPATH, you can easily cd to
+the chosen target directory using bacons. The default installation configures
+$CDPATH in this way.
+
+It is notable that bacons can be given one-character names such as =, %, and so
+on, and can also have names that contain spaces. Additionally, names containing
+Unicode, such as ≈ and ≋, are interesting for identifying paths (however not so
+good for being used with $CDPATH and cd).
+
+
+STABILITY
+
+This program should be fairly stable.
+
+
+FILES
+
+    ~/.bacons       the bacons directory
+    ~/.bacons/*     the individual bacons
+
+NAME
+
+The author first wanted to call this program beacon, however beacon was taken
+already and bacon is close enough. Additionally, this program expands on the
+idea of librelpath_ps1, which allows a single prefix designated by use of the
+character =. The = character looks like a strip of bacon.
+
+
+HISTORY
+
+Research indicates that ~ is prehistoric dinosaur bacon. However, no one has
+eaten it and therefore the actual nature of the meat should be regarded as an
+object of pure speculation.
+
+
+GOSSIP
+
+It is said that the author has not eaten anything for two weeks while writing
+the complete code and documentation for bacon and libbacon_ps1. Please invite
+the author to dinner, lest he perish.
+
+
+LICENSE
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

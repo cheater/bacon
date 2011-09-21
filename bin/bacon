@@ -1,0 +1,229 @@
+#!/bin/bash
+
+error=0
+
+type relpath >/dev/null 2>&1
+if ! [ "$?" -eq 0 ]; then
+  echo "\`relpath' not found." >&2
+  error=1
+  fi
+
+type realpath >/dev/null 2>&1
+if ! [ "$?" -eq 0 ]; then
+  echo "\`realpath' not found." >&2
+  error=1
+  fi
+
+type basename >/dev/null 2>&1
+if ! [ "$?" -eq 0 ]; then
+  echo "\`basename' not found." >&2
+  error=1
+  fi
+
+if [ "$error" -gt 0 ]; then
+  echo "exiting due to errors." >&2
+  exit 1
+  fi
+
+bn=$(basename -- "$1")
+if [ "$bn" == "bacons" ]; then
+  bacon -ll
+  exit $?
+  fi
+
+BACONDIR=".bacons"
+ensure_dotdir() {
+  mkdir -p "$HOME/$BACONDIR"
+  }
+
+baconpath() {
+  # produces the path to the bacon.
+  # arguments:
+  # $1 the name of the searched bacon
+  echo "$HOME/$BACONDIR/$1"
+  }
+
+create_bacon() {
+  # produces a new bacon and places it in ~/$BACONDIR
+  # arguments:
+  # $1: the name of the new bacon
+  ensure_dotdir
+  bp=$(baconpath "$1")
+  if [ -e "$bp" ]; then
+    echo "there is already a bacon named \`$1'" >&2
+    return 1
+    fi
+  rp=$(realpath "$PWD")
+  echo "dry-curing $1"
+  ln -s "$rp" "$bp"
+  }
+
+eat_bacon() {
+  # deletes a bacon from ~/$BACONDIR, but only if it is a link or an empty dir.
+  # arguments:
+  # $1: the name of the bacon to be deleted
+  bp=$(baconpath "$1")
+  if ! [ -e "$bp" ]; then
+    echo "cannot find bacon named \`$1' to eat it." >&2
+    return 1
+    fi
+  removed=0
+  if [ -L "$bp" ]; then
+    rm -f "$bp"
+    removed=1
+  elif [ -d "$bp" ]; then
+    lss=$(ls -1A "$bp")
+    if [ "x" == "x$lss" ]; then
+      rm -rf "$bp"
+      removed=1
+      fi
+    fi
+  if [ "$removed" -eq 1 ]; then
+    echo "Yum! The bacon named \`$1' has been eaten."
+    return 0
+    fi
+  echo "I can not eat the bacon named \`$1'." >&2
+  return 1
+  }
+
+delete_bacon() {
+  # deletes a bacon from ~/$BACONDIR
+  # arguments:
+  # $1: the name of the bacon to be deleted
+  ensure_dotdir
+  bp=$(baconpath "$1")
+  if ! [ -e "$bp" ]; then
+    echo "cannot find bacon \`$1' to delete." >&2
+    return 1
+    fi
+  echo "mercilessly deleting $1"
+  if [ -e "$bp" ]; then
+    rm -rf "$bp"
+    fi
+  }
+
+show_bacons() {
+  # shows the bacons.
+  if [ "$1" -gt 0 ]; then
+    bd="$HOME/$BACONDIR"
+    if [ "$1" -eq 1 ]; then
+      ls -A "$bd"
+      return 0
+      fi
+    bacons=$(ls -1A "$bd")
+    if [ "x" == "x$bacons" ]; then
+      echo "no bacons."
+    else
+      for bacon in "${bacons[@]}"; do
+        echo -n "$bacon"
+        bp=$(baconpath "$bacon")
+        if [ -L "$bp" ]; then
+          echo -n " -> "
+          readlink "$bp"
+        elif [ -d "$bp" ]; then
+          contents=$(ls -1A "$bp")
+          if [ "x" == "x$contents" ]; then
+            echo " (empty directory)"
+          else
+            echo " (directory)"
+            fi
+        elif [ -f "$bp" ]; then
+          echo " (regular bacon)"
+        else
+          echo " (unknown bacon)"
+          fi
+        done
+      fi
+    fi
+  }
+
+help_bacon() {
+  # prints the help for bacon.
+  echo "Usage: bacon [OPTION]... [-d BACON]... [-e BACON]... [-n BACON]..."
+  echo "List information about and manipulate bacons."
+  cat << "EOF"
+  -n BACON    create new bacon named BACON, pointing to working directory
+  -e BACON    eat BACON - remove it, but only if it's a symlink or empty dir
+  -d BACON    delete BACON and any contents if it was a directory
+  -l[l]       list bacons; use twice for verbose listing
+  -f          fry bacon
+  -h          print this help
+
+The options d, e and n may be used multiple times.
+EOF
+  }
+
+acc=""
+declare -a new_bacon_queue
+declare -i new_bacon_count
+new_bacon_count=0
+declare -a delete_bacon_queue
+declare -i delete_bacon_count
+delete_bacon_count=0
+declare -a eat_bacon_queue
+declare -i eat_bacon_count
+eat_bacon_count=0
+
+declare -i show_us_bacons
+show_us_bacons=0
+print_help=0
+fry_bacon=0
+declare -i options
+options=0
+while getopts "ꙮn:d:hfe:l" flag; do
+  options="$options+1"
+  case "$flag" in
+    n)
+      new_bacon_count="$new_bacon_count+1";
+      new_bacon_queue[new_bacon_count]="$OPTARG"
+      ;;
+    d)
+      delete_bacon_count="$delete_bacon_count+1";
+      delete_bacon_queue[delete_bacon_count]="$OPTARG"
+      ;;
+    e)
+      eat_bacon_count="$eat_bacon_count+1";
+      eat_bacon_queue[eat_bacon_count]="$OPTARG"
+      ;;
+    l) show_us_bacons="$show_us_bacons+1";;
+    h) print_help=1;;
+    f) fry_bacon=1;;
+    *) acc="$acc$flag";;
+    esac
+  done
+
+if [ "$options" -eq 0 ] || [ "$print_help" -gt 0 ]; then
+  help_bacon
+  exit 0
+  fi
+
+if [ "$fry_bacon" -gt 0 ]; then
+  echo "Frying bacon..."
+  fi
+
+for bacon in "${delete_bacon_queue[@]}"; do
+  delete_bacon "$bacon"
+  done
+
+for bacon in "${eat_bacon_queue[@]}"; do
+  eat_bacon "$bacon"
+  done
+
+for bacon in "${new_bacon_queue[@]}"; do
+  create_bacon "$bacon"
+  done
+
+show_bacons "$show_us_bacons"
+
+if [[ $acc == *ꙮ* ]]; then
+  echo; echo; echo; echo
+  echo -n                       "                   "
+  echo -e              "\033[4m« серафими многоꙮчитїй »\033[0m"
+  echo
+  echo     " The Seraphim, six-winged, many-eyed, soaring with their wings,"
+  echo     " singing the victory hymn, proclaiming, crying out, and saying:"
+  echo
+  echo -en "    \033[1m\`\`We just can't settle for"
+  echo -e  " anything less than bacon!''\033[0m"
+  echo; echo; echo; echo
+  fi
