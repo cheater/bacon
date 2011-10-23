@@ -116,7 +116,7 @@ show_bacons() {
       ls -A "$bd"
       return 0
       fi
-    bacons=$(ls -1A "$bd")
+    bacons=$(ls -1A "$bd" 2>/dev/null)
     if [ "x" == "x$bacons" ]; then
       echo "no bacons."
     else

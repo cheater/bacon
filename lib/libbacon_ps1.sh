@@ -31,6 +31,14 @@ ps1path() {
     echo "$PS1PATH_CACHE_STR"
     return 0
     fi
+  
+  # Suddenly, the ground disappears from under your feet!
+  # 
+  # (happens e.g. if someone deletes the dir you're in.)
+  if ! [ -e "$PWD" ] || ! [ -e "$PWD/.." ] || ! [ -x "$PWD/.." ]; then
+    ps1path_return "$1"
+    return 0
+    fi
 
   bd="$HOME/.bacons"
   if ! [ -e "$bd" ] || ! [ -d "$bd" ] || ! [ -x "$bd" ]; then
