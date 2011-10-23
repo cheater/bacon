@@ -58,7 +58,11 @@ ps1path() {
   shortest=0
   while read bacon; do
     i="$i + 1"
-    real_bacon=$(realpath "$bd/$bacon")
+    bp=$bd/$bacon
+    if ! [ -d "$bp" ]; then
+      continue
+      fi
+    real_bacon=$(realpath "$bp")
     real_pwd=$(realpath "$PWD")
     rel=$(relpath "$real_bacon" "$real_pwd")
     bacons[$i]=$(bacon_str "$bacon" "$rel")
